@@ -1,5 +1,5 @@
 import test from 'ava';
-import ow from '../source';
+import ow, {ArgumentError} from '../source';
 import {createAnyError} from './fixtures/create-error';
 
 test('not', t => {
@@ -300,9 +300,20 @@ test('reusable validator', t => {
 		checkUsername(value);
 	}, 'Expected string `value` to have a minimum length of `3`, got `x`');
 
-	t.throws(() => {
+	const error: ArgumentError = t.throws(() => {
 		checkUsername(5 as any);
-	}, 'Expected argument to be of type `string` but received type `number`');
+	}, 'Multiple errors were encountered. Please check the `validationErrors` property of the thrown error');
+
+	t.assert(error.validationErrors.size === 1, 'There is one item in the `validationErrors` map');
+	t.true(error.validationErrors.has('string'), 'Validation errors map has key `string`');
+
+	const result1_ = error.validationErrors.get('string')!;
+
+	t.assert(result1_.length === 2, 'There are two reported errors for this input');
+	t.deepEqual(result1_, [
+		'Expected argument to be of type `string` but received type `number`',
+		'Expected string to have a minimum length of `3`, got `5`'
+	], 'There is an error for invalid input type, and one for minimum length not being satisfied');
 });
 
 test('reusable validator called with label', t => {
@@ -327,9 +338,20 @@ test('reusable validator called with label', t => {
 		checkUsername(value, label);
 	}, 'Expected string `bar` to have a minimum length of `3`, got `x`');
 
-	t.throws(() => {
+	const error: ArgumentError = t.throws(() => {
 		checkUsername(5 as any, label);
-	}, 'Expected `bar` to be of type `string` but received type `number`');
+	}, 'Multiple errors were encountered. Please check the `validationErrors` property of the thrown error');
+
+	t.assert(error.validationErrors.size === 1, 'There is one item in the `validationErrors` map');
+	t.true(error.validationErrors.has('bar'), 'Validation errors map has key `bar`');
+
+	const result1_ = error.validationErrors.get('bar')!;
+
+	t.assert(result1_.length === 2, 'There are two reported errors for this input');
+	t.deepEqual(result1_, [
+		'Expected `bar` to be of type `string` but received type `number`',
+		'Expected string `bar` to have a minimum length of `3`, got `5`'
+	], 'There is an error for invalid input type, and one for minimum length not being satisfied');
 });
 
 test('reusable validator with label', t => {
@@ -347,9 +369,20 @@ test('reusable validator with label', t => {
 		checkUsername('fo');
 	}, 'Expected string `foo` to have a minimum length of `3`, got `fo`');
 
-	t.throws(() => {
+	const error: ArgumentError = t.throws(() => {
 		checkUsername(5 as any);
-	}, 'Expected `foo` to be of type `string` but received type `number`');
+	}, 'Multiple errors were encountered. Please check the `validationErrors` property of the thrown error');
+
+	t.assert(error.validationErrors.size === 1, 'There is one item in the `validationErrors` map');
+	t.true(error.validationErrors.has('foo'), 'Validation errors map has key `foo`');
+
+	const result1_ = error.validationErrors.get('foo')!;
+
+	t.assert(result1_.length === 2, 'There are two reported errors for this input');
+	t.deepEqual(result1_, [
+		'Expected `foo` to be of type `string` but received type `number`',
+		'Expected string `foo` to have a minimum length of `3`, got `5`'
+	], 'There is an error for invalid input type, and one for minimum length not being satisfied');
 });
 
 test('reusable validator with label called with label', t => {
@@ -369,9 +402,20 @@ test('reusable validator with label called with label', t => {
 		checkUsername('fo', label);
 	}, 'Expected string `bar` to have a minimum length of `3`, got `fo`');
 
-	t.throws(() => {
+	const error: ArgumentError = t.throws(() => {
 		checkUsername(5 as any, label);
-	}, 'Expected `bar` to be of type `string` but received type `number`');
+	}, 'Multiple errors were encountered. Please check the `validationErrors` property of the thrown error');
+
+	t.assert(error.validationErrors.size === 1, 'There is one item in the `validationErrors` map');
+	t.true(error.validationErrors.has('bar'), 'Validation errors map has key `bar`');
+
+	const result1_ = error.validationErrors.get('bar')!;
+
+	t.assert(result1_.length === 2, 'There are two reported errors for this input');
+	t.deepEqual(result1_, [
+		'Expected `bar` to be of type `string` but received type `number`',
+		'Expected string `bar` to have a minimum length of `3`, got `5`'
+	], 'There is an error for invalid input type, and one for minimum length not being satisfied');
 });
 
 test('any-reusable validator', t => {
@@ -396,7 +440,7 @@ test('any-reusable validator', t => {
 		checkUsername(5 as any);
 	}, createAnyError(
 		'Expected argument to be of type `string` but received type `number`',
-		'Expected argument to be of type `string` but received type `number`'
+		'Expected string to have a minimum length of `3`, got `5`'
 	));
 });
 

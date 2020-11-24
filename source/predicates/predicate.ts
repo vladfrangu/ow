@@ -95,7 +95,10 @@ export class Predicate<T = unknown> implements BasePredicate<T> {
 	/**
 	@hidden
 	*/
-	[testSymbol](value: T | undefined, main: Main, label: string | Function): asserts value {
+	[testSymbol](value: T | undefined, main: Main, label: string | Function, stack: string): asserts value {
+		// Create a map of labels -> received errors
+		const errors = new Map<string, string[]>();
+
 		for (const {validator, message} of this.context.validators) {
 			if (this.options.optional === true && value === undefined) {
 				continue;
@@ -109,18 +112,43 @@ export class Predicate<T = unknown> implements BasePredicate<T> {
 				continue;
 			}
 
-			let label2 = label;
+			const label2 = is.function_(label) ? label() : label;
 
-			if (typeof label === 'function') {
-				label2 = label();
-			}
-
-			label2 = label2 ?
+			const label_ = label2 ?
 				`${this.type} \`${label2}\`` :
 				this.type;
 
-			// TODO: Modify the stack output to show the original `ow()` call instead of this `throw` statement
-			throw new ArgumentError(message(knownValue, label2, result), main);
+			const mapKey = label2 || this.type;
+
+			// Get the current errors encountered for this label
+			const currentErrors = errors.get(mapKey);
+			// Pre-generate the error message that will be reported to the user
+			const errorMessage = message(knownValue, label_, result);
+
+			// If we already have any errors for this label
+			if (currentErrors) {
+				// If we don't already have this error logged, add it
+				if (!currentErrors.includes(errorMessage)) {
+					currentErrors.push(errorMessage);
+				}
+			} else {
+				// Set this label and error in the full map
+				errors.set(mapKey, [errorMessage]);
+			}
+		}
+
+		// Generate the `error.message` property
+		let message = 'No errors encountered...?';
+		let singleError_ = [];
+		// If there is only 1 type of errors reported, get the length of it, otherwise of the full map
+		const length_ = errors.size === 1 ? (singleError_ = errors.values().next().value).length : errors.size;
+
+		// Set the message to the only error (if there was only 1 reported), else notify the user that there are multiple errors
+		message = length_ === 1 ? singleError_[0] : 'Multiple errors were encountered. Please check the `validationErrors` property of the thrown error';
+
+		// If we have any errors to report, throw
+		if (length_ > 0) {
+			throw new ArgumentError(message, main, stack, errors);
 		}
 	}
 
