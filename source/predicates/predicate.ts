@@ -138,7 +138,7 @@ export class Predicate<T = unknown> implements BasePredicate<T> {
 		}
 
 		// Generate the `error.message` property
-		let message = 'No errors encountered...?';
+		let message = '';
 		let singleError_ = [];
 		// If there is only 1 type of errors reported, get the length of it, otherwise of the full map
 		const length_ = errors.size === 1 ? (singleError_ = errors.values().next().value).length : errors.size;
