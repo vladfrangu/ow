@@ -4,7 +4,7 @@ const wrapStackTrace = (err: ArgumentError, stack: string) => `${err.name}: ${er
 @hidden
 */
 export class ArgumentError extends Error {
-	validationErrors: Map<string, string[]>;
+	readonly validationErrors: ReadonlyMap<string, string[]>;
 
 	constructor(message: string, context: Function, stack: string, errors = new Map<string, string[]>()) {
 		super(message);
