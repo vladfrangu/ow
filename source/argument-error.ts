@@ -6,7 +6,7 @@ const wrapStackTrace = (err: ArgumentError, stack: string) => `${err.name}: ${er
 export class ArgumentError extends Error {
 	validationErrors: Map<string, string[]>;
 
-	constructor(message: string, context: Function, stack: string, errors?: Map<string, string[]>) {
+	constructor(message: string, context: Function, stack: string, errors = new Map<string, string[]>()) {
 		super(message);
 
 		this.name = 'ArgumentError';
@@ -17,6 +17,6 @@ export class ArgumentError extends Error {
 			this.stack = wrapStackTrace(this, stack);
 		}
 
-		this.validationErrors = errors ?? new Map();
+		this.validationErrors = errors;
 	}
 }
