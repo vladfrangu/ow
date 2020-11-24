@@ -65,11 +65,13 @@ export class AnyPredicate<T = unknown> implements BasePredicate<T> {
 		// Generate the `error.message` property
 		const message = generatePredicateMessage(errors);
 
-		throw new ArgumentError(
-			message,
-			main,
-			stack,
-			errors
-		);
+		if (errors.size > 0) {
+			throw new ArgumentError(
+				message,
+				main,
+				stack,
+				errors
+			);
+		}
 	}
 }
