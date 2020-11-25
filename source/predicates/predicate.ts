@@ -106,7 +106,14 @@ export class Predicate<T = unknown> implements BasePredicate<T> {
 
 			const knownValue = value!;
 
-			const result = validator(knownValue);
+			let result: unknown;
+
+			try {
+				result = validator(knownValue);
+			} catch (error: unknown) {
+				// Any errors caught means validators couldn't process the input
+				result = error;
+			}
 
 			if (result === true) {
 				continue;

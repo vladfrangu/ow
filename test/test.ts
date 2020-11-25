@@ -440,6 +440,7 @@ test('any-reusable validator', t => {
 		checkUsername(5 as any);
 	}, createAnyError(
 		'Expected argument to be of type `string` but received type `number`',
+		'Expected string to include `.`, got `5`',
 		'Expected string to have a minimum length of `3`, got `5`'
 	));
 });
