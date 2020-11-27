@@ -1,4 +1,4 @@
-const wrapStackTrace = (err: ArgumentError, stack: string) => `${err.name}: ${err.message}\n${stack}`;
+const wrapStackTrace = (error: ArgumentError, stack: string) => `${error.name}: ${error.message}\n${stack}`;
 
 /**
 @hidden
