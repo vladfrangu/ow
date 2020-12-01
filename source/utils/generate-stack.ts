@@ -1,10 +1,11 @@
 /**
-Generates a useful stacktrace for your verification.
+Generates a useful stacktrace that points to the user's code where the error happened,
+on platforms without the `Error.captureStackTrace` function present
 
 @hidden
 */
 export const generateStackTrace = () => {
-	const stack = new RangeError('INTERNAL_OW_ERROR').stack!.split('\n').slice(3).join('\n');
+	const stack = new RangeError('INTERNAL_OW_ERROR').stack!;
 
 	return stack;
 };
