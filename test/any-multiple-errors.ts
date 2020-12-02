@@ -59,6 +59,8 @@ test('any predicate', t => {
 		'Expected argument to be of type `number` but received type `null`'
 	));
 
+	t.is(error_3.validationErrors.size, 2, 'There should be two types of errors reported');
+
 	const reportedError_3_1 = error_3.validationErrors.get('string')!;
 	const reportedError_3_2 = error_3.validationErrors.get('number')!;
 
@@ -87,11 +89,11 @@ test('any predicate', t => {
 		'Expected string to have a minimum length of `42`, got `21`'
 	));
 
-	t.is(error_4.validationErrors.size, 1, 'There should be two types of errors reported');
+	t.is(error_4.validationErrors.size, 1, 'There should be one type of error reported');
 
 	const reportedError_4_1 = error_4.validationErrors.get('string')!;
 
-	t.is(reportedError_4_1.length, 4, 'There should be three errors reported for the string predicate');
+	t.is(reportedError_4_1.length, 4, 'There should be four errors reported for the string predicate');
 
 	t.deepEqual(reportedError_4_1, [
 		'Expected argument to be of type `string` but received type `number`',
@@ -110,6 +112,6 @@ test('any predicate', t => {
 
 	t.notThrows(() => {
 		ow(5 as any, ow.any(new CustomPredicate()));
-	}, 'No error should be thrown when the thrown error from the predicate is not an ArgumentError');
+	}, 'It should not throw when the thrown error from the predicate is not an ArgumentError');
 	// #endregion
 });
