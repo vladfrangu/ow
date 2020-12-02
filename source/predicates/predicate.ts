@@ -151,7 +151,7 @@ export class Predicate<T = unknown> implements BasePredicate<T> {
 		const length_ = errors.size === 1 ? (singleError_ = errors.values().next().value).length : errors.size;
 
 		// Set the message to the only error (if there was only 1 reported), else notify the user that there are multiple errors
-		message = length_ === 1 ? singleError_[0] : 'Multiple errors were encountered. Please check the `validationErrors` property of the thrown error';
+		message = length_ === 1 ? singleError_[0] : 'Multiple errors were encountered. Please check the `validationErrors` property for more information';
 
 		// If we have any errors to report, throw
 		if (length_ > 0) {

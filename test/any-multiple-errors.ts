@@ -1,0 +1,115 @@
+import test from 'ava';
+import ow, {ArgumentError, BasePredicate, Main} from '../source';
+import {testSymbol} from '../source/predicates/base-predicate';
+import {createAnyError} from './fixtures/create-error';
+
+test('any predicate', t => {
+	// #region Tests line 8-11 of predicates/any.ts
+	const error_1 = t.throws<ArgumentError>(() => {
+		ow(5 as any, ow.any(ow.string));
+	}, createAnyError('Expected argument to be of type `string` but received type `number`'));
+
+	t.is(error_1.validationErrors.size, 1, 'There should be only one error');
+
+	const reportedError_1_1 = error_1.validationErrors.get('string')!;
+
+	t.is(reportedError_1_1.length, 1, 'There should be only one element');
+	t.deepEqual(reportedError_1_1, [
+		'Expected argument to be of type `string` but received type `number`'
+	]);
+
+	// #endregion
+
+	// #region Tests line 15-19 of predicates/any.ts
+	const error_2 = t.throws<ArgumentError>(() => {
+		ow(21 as any, ow.any(
+			ow.string.url.minLength(24),
+			ow.number.greaterThan(42)
+		));
+	}, 'Any predicate failed. Please check the `validationErrors` property for more information');
+
+	t.is(error_2.validationErrors.size, 2, 'There should be two types of errors reported');
+
+	const reportedError_2_1 = error_2.validationErrors.get('string')!;
+	const reportedError_2_2 = error_2.validationErrors.get('number')!;
+
+	t.is(reportedError_2_1.length, 3, 'There should be three errors reported for the string predicate');
+	t.is(reportedError_2_2.length, 1, 'There should be one error reported for the number predicate');
+
+	t.deepEqual(reportedError_2_1, [
+		'Expected argument to be of type `string` but received type `number`',
+		'Expected string to be a URL, got `21`',
+		'Expected string to have a minimum length of `24`, got `21`'
+	]);
+
+	t.deepEqual(reportedError_2_2, [
+		'Expected number to be greater than 42, got 21'
+	]);
+
+	// #endregion
+
+	// #region Tests line 22 of predicates/any.ts
+	const error_3 = t.throws<ArgumentError>(() => {
+		ow(null as any, ow.any(
+			ow.string,
+			ow.number
+		));
+	}, createAnyError(
+		'Expected argument to be of type `string` but received type `null`',
+		'Expected argument to be of type `number` but received type `null`'
+	));
+
+	const reportedError_3_1 = error_3.validationErrors.get('string')!;
+	const reportedError_3_2 = error_3.validationErrors.get('number')!;
+
+	t.is(reportedError_3_1.length, 1, 'There should be one error reported for the string predicate');
+	t.is(reportedError_3_2.length, 1, 'There should be one error reported for the number predicate');
+
+	t.deepEqual(reportedError_3_1, [
+		'Expected argument to be of type `string` but received type `null`'
+	]);
+	t.deepEqual(reportedError_3_2, [
+		'Expected argument to be of type `number` but received type `null`'
+	]);
+
+	// #endregion
+
+	// #region Tests line 51-55 of predicates/any.ts
+	const error_4 = t.throws<ArgumentError>(() => {
+		ow(21 as any, ow.any(
+			ow.string.url.minLength(21),
+			ow.string.url.minLength(42)
+		));
+	}, createAnyError(
+		'Expected argument to be of type `string` but received type `number`',
+		'Expected string to be a URL, got `21`',
+		'Expected string to have a minimum length of `21`, got `21`',
+		'Expected string to have a minimum length of `42`, got `21`'
+	));
+
+	t.is(error_4.validationErrors.size, 1, 'There should be two types of errors reported');
+
+	const reportedError_4_1 = error_4.validationErrors.get('string')!;
+
+	t.is(reportedError_4_1.length, 4, 'There should be three errors reported for the string predicate');
+
+	t.deepEqual(reportedError_4_1, [
+		'Expected argument to be of type `string` but received type `number`',
+		'Expected string to be a URL, got `21`',
+		'Expected string to have a minimum length of `21`, got `21`',
+		'Expected string to have a minimum length of `42`, got `21`'
+	]);
+	// #endregion
+
+	// #region Tests line 47,65
+	class CustomPredicate implements BasePredicate<string> {
+		[testSymbol](_value: string, _main: Main, _label: string | Function, _stack: string): void {
+			throw new Error('Custom error.');
+		}
+	}
+
+	t.notThrows(() => {
+		ow(5 as any, ow.any(new CustomPredicate()));
+	}, 'No error should be thrown when the thrown error from the predicate is not an ArgumentError');
+	// #endregion
+});

@@ -302,7 +302,7 @@ test('reusable validator', t => {
 
 	const error = t.throws<ArgumentError>(() => {
 		checkUsername(5 as any);
-	}, 'Multiple errors were encountered. Please check the `validationErrors` property of the thrown error');
+	}, 'Multiple errors were encountered. Please check the `validationErrors` property for more information');
 
 	t.is(error.validationErrors.size, 1, 'There is one item in the `validationErrors` map');
 	t.true(error.validationErrors.has('string'), 'Validation errors map has key `string`');
@@ -340,7 +340,7 @@ test('reusable validator called with label', t => {
 
 	const error = t.throws<ArgumentError>(() => {
 		checkUsername(5 as any, label);
-	}, 'Multiple errors were encountered. Please check the `validationErrors` property of the thrown error');
+	}, 'Multiple errors were encountered. Please check the `validationErrors` property for more information');
 
 	t.is(error.validationErrors.size, 1, 'There is one item in the `validationErrors` map');
 	t.true(error.validationErrors.has('bar'), 'Validation errors map has key `bar`');
@@ -371,7 +371,7 @@ test('reusable validator with label', t => {
 
 	const error = t.throws<ArgumentError>(() => {
 		checkUsername(5 as any);
-	}, 'Multiple errors were encountered. Please check the `validationErrors` property of the thrown error');
+	}, 'Multiple errors were encountered. Please check the `validationErrors` property for more information');
 
 	t.is(error.validationErrors.size, 1, 'There is one item in the `validationErrors` map');
 	t.true(error.validationErrors.has('foo'), 'Validation errors map has key `foo`');
@@ -404,7 +404,7 @@ test('reusable validator with label called with label', t => {
 
 	const error = t.throws<ArgumentError>(() => {
 		checkUsername(5 as any, label);
-	}, 'Multiple errors were encountered. Please check the `validationErrors` property of the thrown error');
+	}, 'Multiple errors were encountered. Please check the `validationErrors` property for more information');
 
 	t.is(error.validationErrors.size, 1, 'There is one item in the `validationErrors` map');
 	t.true(error.validationErrors.has('bar'), 'Validation errors map has key `bar`');
@@ -459,4 +459,45 @@ test('custom validation function', t => {
 			validator: value === '🌈'
 		})));
 	}, '(string `unicorn`) Should be `🌈`');
+
+	t.notThrows(() => {
+		ow('🦄', 'unicorn', ow.string.validate(value => ({
+			message: label => `Expected ${label} to be '🦄', got \`${value}\``,
+			validator: value === '🦄'
+		})));
+	});
+});
+
+test('ow without valid arguments', t => {
+	t.throws(() => {
+		ow(5, {} as any);
+	}, 'Expected second argument to be a predicate or a string, got `object`');
+});
+
+// This test is to cover all paths of source/utils/generate-stacks.ts
+test('ow without Error.captureStackTrace', t => {
+	const originalErrorStackTrace = Error.captureStackTrace;
+	// @ts-expect-error We are manually overwriting this
+	Error.captureStackTrace = null;
+
+	t.throws<ArgumentError>(() => {
+		ow('owo', ow.string.equals('OwO'));
+	}, 'Expected string to be equal to `OwO`, got `owo`');
+
+	// eslint-disable-next-line @typescript-eslint/no-var-requires
+	Object.defineProperty(require('../source/utils/node/is-node'), 'default', {
+		value: false
+	});
+
+	t.throws<ArgumentError>(() => {
+		ow('owo', ow.string.equals('OwO'));
+	}, 'Expected string to be equal to `OwO`, got `owo`');
+
+	// Re-set the properties back to their default values
+	Error.captureStackTrace = originalErrorStackTrace;
+
+	// eslint-disable-next-line @typescript-eslint/no-var-requires
+	Object.defineProperty(require('../source/utils/node/is-node'), 'default', {
+		value: true
+	});
 });

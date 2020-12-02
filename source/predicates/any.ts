@@ -13,7 +13,7 @@ const generatePredicateMessage = (errors: Map<string, string[]>) => {
 	const errorArray = [...errors.values()];
 
 	const anyErrorWithoutOneItemOnly = errorArray.some(array => array.length !== 1);
-	// If there's any error with more than one item, tell users to check `validationErrors` property
+	// If there's any predicate with more than one error, tell users to check `validationErrors` property
 	if (anyErrorWithoutOneItemOnly) {
 		return 'Any predicate failed. Please check the `validationErrors` property for more information';
 	}
