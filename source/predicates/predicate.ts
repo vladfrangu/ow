@@ -78,7 +78,7 @@ export class Predicate<T = unknown> implements BasePredicate<T> {
 			...this.options
 		};
 
-		const x = this.type[0].toLowerCase() + this.type.slice(1);
+		const typeString = this.type.charAt(0).toLowerCase() + this.type.slice(1);
 
 		this.addValidator({
 			message: (value, label) => {
@@ -88,14 +88,14 @@ export class Predicate<T = unknown> implements BasePredicate<T> {
 				// eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
 				return `Expected ${label_ || 'argument'} to be of type \`${this.type}\` but received type \`${is(value)}\``;
 			},
-			validator: value => (is as any)[x](value)
+			validator: value => (is as any)[typeString](value)
 		});
 	}
 
 	/**
 	@hidden
 	*/
-	[testSymbol](value: T | undefined, main: Main, label: string | Function, stack: string): asserts value {
+	[testSymbol](value: T, main: Main, label: string | Function, stack: string): asserts value is T {
 		// Create a map of labels -> received errors
 		const errors = new Map<string, string[]>();
 
@@ -104,12 +104,10 @@ export class Predicate<T = unknown> implements BasePredicate<T> {
 				continue;
 			}
 
-			const knownValue = value!;
-
 			let result: unknown;
 
 			try {
-				result = validator(knownValue);
+				result = validator(value);
 			} catch (error: unknown) {
 				// Any errors caught means validators couldn't process the input
 				result = error;
@@ -130,7 +128,7 @@ export class Predicate<T = unknown> implements BasePredicate<T> {
 			// Get the current errors encountered for this label
 			const currentErrors = errors.get(mapKey);
 			// Pre-generate the error message that will be reported to the user
-			const errorMessage = message(knownValue, label_, result);
+			const errorMessage = message(value, label_, result);
 
 			// If we already have any errors for this label
 			if (currentErrors) {
@@ -230,7 +228,7 @@ export class Predicate<T = unknown> implements BasePredicate<T> {
 	message(newMessage: string | ValidatorMessageBuilder<T>) {
 		const {validators} = this.context;
 
-		validators[validators.length - 1].message = (value, label) => {
+		validators[validators.length - 1]!.message = (value, label) => {
 			if (typeof newMessage === 'function') {
 				return newMessage(value, label);
 			}

@@ -4,7 +4,7 @@
 	<br>
 </p>
 
-[![Build Status](https://travis-ci.org/sindresorhus/ow.svg?branch=master)](https://travis-ci.org/sindresorhus/ow) [![Coverage Status](https://codecov.io/gh/sindresorhus/ow/branch/master/graph/badge.svg)](https://codecov.io/gh/sindresorhus/ow) [![gzip size](https://badgen.net/bundlephobia/minzip/ow)](https://bundlephobia.com/result?p=ow) [![install size](https://packagephobia.now.sh/badge?p=ow)](https://packagephobia.now.sh/result?p=ow)
+[![Coverage Status](https://codecov.io/gh/sindresorhus/ow/branch/master/graph/badge.svg)](https://codecov.io/gh/sindresorhus/ow) [![gzip size](https://badgen.net/bundlephobia/minzip/ow)](https://bundlephobia.com/result?p=ow) [![install size](https://packagephobia.now.sh/badge?p=ow)](https://packagephobia.now.sh/result?p=ow)
 
 > Function argument validation for humans
 
@@ -23,6 +23,8 @@ $ npm install ow
 ```
 
 ## Usage
+
+*If you use CommonJS, you need to import is as `const {default: ow} = require('ow')`.*
 
 ```ts
 import ow from 'ow';
@@ -67,7 +69,17 @@ ow(unicorn, ow.object.exactShape({
 
 [Complete API documentation](https://sindresorhus.com/ow)
 
-Ow does not currently include TypeScript type guards, but we do [plan to include type assertions](https://github.com/sindresorhus/ow/issues/159).
+Ow includes TypeScript type guards, so using it will narrow the type of previously-unknown values.
+
+```ts
+function (input: unknown) {
+	input.slice(0, 3) // Error, Property 'slice' does not exist on type 'unknown'
+
+	ow(input, ow.string)
+
+	input.slice(0, 3) // OK
+}
+```
 
 ### ow(value, predicate)
 
