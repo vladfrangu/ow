@@ -302,7 +302,10 @@ test('reusable validator', t => {
 
 	const error = t.throws<ArgumentError>(() => {
 		checkUsername(5 as any);
-	}, 'Multiple errors were encountered. Please check the `validationErrors` property for more information');
+	}, [
+		'Expected argument to be of type `string` but received type `number`',
+		'Expected string to have a minimum length of `3`, got `5`'
+	].join('\n'));
 
 	t.is(error.validationErrors.size, 1, 'There is one item in the `validationErrors` map');
 	t.true(error.validationErrors.has('string'), 'Validation errors map has key `string`');
@@ -340,7 +343,10 @@ test('reusable validator called with label', t => {
 
 	const error = t.throws<ArgumentError>(() => {
 		checkUsername(5 as any, label);
-	}, 'Multiple errors were encountered. Please check the `validationErrors` property for more information');
+	}, [
+		'Expected `bar` to be of type `string` but received type `number`',
+		'Expected string `bar` to have a minimum length of `3`, got `5`'
+	].join('\n'));
 
 	t.is(error.validationErrors.size, 1, 'There is one item in the `validationErrors` map');
 	t.true(error.validationErrors.has('bar'), 'Validation errors map has key `bar`');
@@ -371,7 +377,10 @@ test('reusable validator with label', t => {
 
 	const error = t.throws<ArgumentError>(() => {
 		checkUsername(5 as any);
-	}, 'Multiple errors were encountered. Please check the `validationErrors` property for more information');
+	}, [
+		'Expected `foo` to be of type `string` but received type `number`',
+		'Expected string `foo` to have a minimum length of `3`, got `5`'
+	].join('\n'));
 
 	t.is(error.validationErrors.size, 1, 'There is one item in the `validationErrors` map');
 	t.true(error.validationErrors.has('foo'), 'Validation errors map has key `foo`');
@@ -404,7 +413,10 @@ test('reusable validator with label called with label', t => {
 
 	const error = t.throws<ArgumentError>(() => {
 		checkUsername(5 as any, label);
-	}, 'Multiple errors were encountered. Please check the `validationErrors` property for more information');
+	}, [
+		'Expected `bar` to be of type `string` but received type `number`',
+		'Expected string `bar` to have a minimum length of `3`, got `5`'
+	].join('\n'));
 
 	t.is(error.validationErrors.size, 1, 'There is one item in the `validationErrors` map');
 	t.true(error.validationErrors.has('bar'), 'Validation errors map has key `bar`');

@@ -2,25 +2,7 @@ import {ArgumentError} from '../argument-error';
 import {BasePredicate, testSymbol} from './base-predicate';
 import {PredicateOptions} from './predicate';
 import {Main} from '..';
-
-const generatePredicateMessage = (errors: Map<string, string[]>) => {
-	// If we have one item, return all of its errors.
-	if (errors.size === 1) {
-		const array: string[] = errors.values().next().value;
-		return `Any predicate failed with the following errors:\n- ${array.join('\n- ')}`;
-	}
-
-	const errorArray = [...errors.values()];
-
-	const anyErrorWithoutOneItemOnly = errorArray.some(array => array.length !== 1);
-	// If there's any predicate with more than one error, tell users to check the `validationErrors` property.
-	if (anyErrorWithoutOneItemOnly) {
-		return 'Any predicate failed. Please check the `validationErrors` property for more information';
-	}
-
-	// All errors here have just one issue, report them as normal.
-	return `Any predicate failed with the following errors:\n- ${errorArray.map(([item]) => item).join('\n- ')}`;
-};
+import {generateArgumentErrorMessage} from '../utils/generate-argument-error-message';
 
 /**
 @hidden
@@ -43,18 +25,18 @@ export class AnyPredicate<T = unknown> implements BasePredicate<T> {
 					return;
 				}
 
-				// If we received an ArgumentError
+				// If we received an ArgumentError, then..
 				if (error instanceof ArgumentError) {
-					// Iterate through every error reported
+					// Iterate through every error reported.
 					for (const [key, value] of error.validationErrors.entries()) {
-						// Get the current errors set, if any
+						// Get the current errors set, if any.
 						const alreadyPresent = errors.get(key);
 
-						// If they are present already, create a unique set with both current and new values
+						// If they are present already, create a unique set with both current and new values.
 						if (alreadyPresent) {
 							errors.set(key, [...new Set([...alreadyPresent, ...value])]);
 						} else {
-							// Add the errors found as is to the map
+							// Add the errors found as is to the map.
 							errors.set(key, value);
 						}
 					}
@@ -63,11 +45,11 @@ export class AnyPredicate<T = unknown> implements BasePredicate<T> {
 		}
 
 		if (errors.size > 0) {
-			// Generate the `error.message` property
-			const message = generatePredicateMessage(errors);
+			// Generate the `error.message` property.
+			const message = generateArgumentErrorMessage(errors, true);
 
 			throw new ArgumentError(
-				message,
+				`Any predicate failed with the following errors:\n${message}`,
 				main,
 				stack,
 				errors

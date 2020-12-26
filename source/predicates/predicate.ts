@@ -3,6 +3,7 @@ import {ArgumentError} from '../argument-error';
 import {not} from '../operators/not';
 import {BasePredicate, testSymbol} from './base-predicate';
 import {Main} from '..';
+import {generateArgumentErrorMessage} from '../utils/generate-argument-error-message';
 
 /**
 Function executed when the provided validation fails.
@@ -96,7 +97,7 @@ export class Predicate<T = unknown> implements BasePredicate<T> {
 	@hidden
 	*/
 	[testSymbol](value: T, main: Main, label: string | Function, stack: string): asserts value is T {
-		// Create a map of labels -> received errors
+		// Create a map of labels -> received errors.
 		const errors = new Map<string, string[]>();
 
 		for (const {validator, message} of this.context.validators) {
@@ -109,7 +110,7 @@ export class Predicate<T = unknown> implements BasePredicate<T> {
 			try {
 				result = validator(value);
 			} catch (error: unknown) {
-				// Any errors caught means validators couldn't process the input
+				// Any errors caught means validators couldn't process the input.
 				result = error;
 			}
 
@@ -125,34 +126,31 @@ export class Predicate<T = unknown> implements BasePredicate<T> {
 
 			const mapKey = label2 || this.type;
 
-			// Get the current errors encountered for this label
+			// Get the current errors encountered for this label.
 			const currentErrors = errors.get(mapKey);
-			// Pre-generate the error message that will be reported to the user
+			// Pre-generate the error message that will be reported to the user.
 			const errorMessage = message(value, label_, result);
 
-			// If we already have any errors for this label
+			// If we already have any errors for this label.
 			if (currentErrors) {
-				// If we don't already have this error logged, add it
+				// If we don't already have this error logged, add it.
 				if (!currentErrors.includes(errorMessage)) {
 					currentErrors.push(errorMessage);
 				}
 			} else {
-				// Set this label and error in the full map
+				// Set this label and error in the full map.
 				errors.set(mapKey, [errorMessage]);
 			}
 		}
 
-		// Generate the `error.message` property
-		let message = '';
-		let singleError_ = [];
-		// If there is only 1 type of errors reported, get the length of it, otherwise of the full map
-		const length_ = errors.size === 1 ? (singleError_ = errors.values().next().value).length : errors.size;
+		// If there is only 1 type of errors reported, get the length of it, otherwise of the full map.
+		const length_ = errors.size === 1 ? errors.values().next().value.length : errors.size;
 
-		// Set the message to the only error (if there was only 1 reported), else notify the user that there are multiple errors
-		message = length_ === 1 ? singleError_[0] : 'Multiple errors were encountered. Please check the `validationErrors` property for more information';
-
-		// If we have any errors to report, throw
+		// If we have any errors to report, throw.
 		if (length_ > 0) {
+			// Generate the `error.message` property.
+			const message = generateArgumentErrorMessage(errors);
+
 			throw new ArgumentError(message, main, stack, errors);
 		}
 	}

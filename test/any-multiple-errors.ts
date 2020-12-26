@@ -1,10 +1,10 @@
 import test from 'ava';
 import ow, {ArgumentError, BasePredicate, Main} from '../source';
 import {testSymbol} from '../source/predicates/base-predicate';
-import {createAnyError} from './fixtures/create-error';
+import {createAnyError, createAnyPredicateError} from './fixtures/create-error';
 
 test('any predicate', t => {
-	// #region Tests line 8-11 of predicates/any.ts
+	// #region Tests line 49 of predicates/any.ts and lines 16-21 of utils/generate-argument-error-message.ts
 	const error_1 = t.throws<ArgumentError>(() => {
 		ow(5 as any, ow.any(ow.string));
 	}, createAnyError('Expected argument to be of type `string` but received type `number`'));
@@ -20,13 +20,23 @@ test('any predicate', t => {
 
 	// #endregion
 
-	// #region Tests line 15-19 of predicates/any.ts
+	// #region Tests line 49 of predicates/any.ts and lines 36-41 of utils/generate-argument-error-message.ts
 	const error_2 = t.throws<ArgumentError>(() => {
 		ow(21 as any, ow.any(
 			ow.string.url.minLength(24),
 			ow.number.greaterThan(42)
 		));
-	}, 'Any predicate failed. Please check the `validationErrors` property for more information');
+	}, createAnyPredicateError([
+		'string',
+		[
+			'Expected argument to be of type `string` but received type `number`',
+			'Expected string to be a URL, got `21`',
+			'Expected string to have a minimum length of `24`, got `21`'
+		]
+	], [
+		'number',
+		['Expected number to be greater than 42, got 21']
+	]));
 
 	t.is(error_2.validationErrors.size, 2, 'There should be two types of errors reported');
 
@@ -48,7 +58,7 @@ test('any predicate', t => {
 
 	// #endregion
 
-	// #region Tests line 22 of predicates/any.ts
+	// #region Tests line 49 of predicates/any.ts and lines 31-33 of utils/generate-argument-error-message.ts
 	const error_3 = t.throws<ArgumentError>(() => {
 		ow(null as any, ow.any(
 			ow.string,
@@ -74,9 +84,6 @@ test('any predicate', t => {
 		'Expected argument to be of type `number` but received type `null`'
 	]);
 
-	// #endregion
-
-	// #region Tests line 51-55 of predicates/any.ts
 	const error_4 = t.throws<ArgumentError>(() => {
 		ow(21 as any, ow.any(
 			ow.string.url.minLength(21),
