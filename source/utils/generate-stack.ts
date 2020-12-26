@@ -4,7 +4,7 @@ Generates a useful stacktrace that points to the user's code where the error hap
 @hidden
 */
 export const generateStackTrace = () => {
-	let stack = new RangeError('INTERNAL_OW_ERROR').stack!;
+	const stack = new RangeError('INTERNAL_OW_ERROR').stack!;
 
 	return stack;
 };
