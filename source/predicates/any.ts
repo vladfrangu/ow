@@ -4,7 +4,7 @@ import {PredicateOptions} from './predicate';
 import {Main} from '..';
 
 const generatePredicateMessage = (errors: Map<string, string[]>) => {
-	// If we have one item, return all it's errors
+	// If we have one item, return all of its errors.
 	if (errors.size === 1) {
 		const array: string[] = errors.values().next().value;
 		return `Any predicate failed with the following errors:\n- ${array.join('\n- ')}`;
@@ -13,12 +13,12 @@ const generatePredicateMessage = (errors: Map<string, string[]>) => {
 	const errorArray = [...errors.values()];
 
 	const anyErrorWithoutOneItemOnly = errorArray.some(array => array.length !== 1);
-	// If there's any predicate with more than one error, tell users to check `validationErrors` property
+	// If there's any predicate with more than one error, tell users to check the `validationErrors` property.
 	if (anyErrorWithoutOneItemOnly) {
 		return 'Any predicate failed. Please check the `validationErrors` property for more information';
 	}
 
-	// All errors here have just one issue, report them as normal
+	// All errors here have just one issue, report them as normal.
 	return `Any predicate failed with the following errors:\n- ${errorArray.map(([item]) => item).join('\n- ')}`;
 };
 
